@@ -1,10 +1,16 @@
+const dns = require('dns');
+dns.setServers(['8.8.8.8', '8.8.4.4']);
+
+require("dotenv").config();
+
+
 const express = require("express");
 const path = require("path");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
-require("dotenv").config();
+
 
 const connectDatabase =
     require("./db/connection");
