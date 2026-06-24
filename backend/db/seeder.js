@@ -18,8 +18,7 @@ BrandSchema.index({ barcode: 1 });
 const Brand = mongoose.model("Brand", BrandSchema);
 
 const runSeeder = async () => {
-    // Falls back to your connection string if environment variable isn't fully initialized
-    const backupUri = "mongodb+srv://naturereplicate8068_db_user:gMdsjmTdBpU5TIJv@cluster0.n9n43d9.mongodb.net/ethiscan?appName=Cluster0";
+    const backupUri = "mongodb+srv://Volinipriya06:volinipriya06@ethiscan-db.dbij92s.mongodb.net/EthiScan";
     process.env.MONGO_URI = process.env.MONGO_URI || backupUri;
     
     await connectDatabase();
@@ -39,9 +38,11 @@ const runSeeder = async () => {
 
     console.log("Initializing high-velocity stream processing for 50k dataset...");
 
-    fs.createReadStream(csvFilePath)
+    const stream = fs.createReadStream(csvFilePath);
+
+    stream
         .pipe(csv())
-        .on("data", (row) => {
+        .on("data", async (row) => {
             batch.push({
                 name: row.name || row.Name || "Unknown Brand",
                 barcode: row.barcode || row.Barcode || row.upc || "000000000000",
@@ -52,24 +53,30 @@ const runSeeder = async () => {
             });
 
             if (batch.length === BATCH_SIZE) {
+                stream.pause();
+
                 const currentBatch = [...batch];
                 batch = [];
-                fs.createReadStream(csvFilePath).pause();
-                Brand.insertMany(currentBatch)
-                    .then(() => {
-                        totalInserted += currentBatch.length;
-                        console.log(`Stream pipeline progress metrics: Inserted ${totalInserted} entries...`);
-                        fs.createReadStream(csvFilePath).resume();
-                    })
-                    .catch(err => {
-                        console.error("Batch synchronization checkpoint anomaly:", err.message);
-                    });
+
+                try {
+                    await Brand.insertMany(currentBatch);
+                    totalInserted += currentBatch.length;
+                    console.log(`Stream pipeline progress metrics: Inserted ${totalInserted} entries...`);
+                    stream.resume();
+                } catch (err) {
+                    console.error("Batch synchronization checkpoint anomaly:", err.message);
+                    stream.resume();
+                }
             }
         })
         .on("end", async () => {
             if (batch.length > 0) {
-                await Brand.insertMany(batch);
-                totalInserted += batch.length;
+                try {
+                    await Brand.insertMany(batch);
+                    totalInserted += batch.length;
+                } catch (err) {
+                    console.error("Final batch insert anomaly:", err.message);
+                }
             }
             console.log(`\nSUCCESS: Database cluster completely mapped. Total records indexed: ${totalInserted}`);
             process.exit(0);

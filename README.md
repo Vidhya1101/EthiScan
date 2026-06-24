@@ -56,7 +56,7 @@ EthiScan combines live web intelligence, AI reasoning, and interactive analytics
 
 # 3. Tech Stack
 
-## Frontend
+## Frontend named as docs
 
 * HTML5
 * CSS3
@@ -151,29 +151,7 @@ MONGO_URI=your_mongodb_connection_string
 
 ---
 
-# 7. Screenshots
-
-## Home Interface
-
-* Live ethical brand scanner
-* AI-powered analysis interface
-
-## Ethical Analysis Result
-
-* Ethical score visualization
-* Sustainability indicators
-* Ethical concerns
-* Smart alternatives
-
-## Dashboard
-
-* Search history
-* Telemetry analytics
-* Ethical distribution metrics
-
----
-
-# 8. Future Improvements
+# 7. Future Improvements
 
 * Barcode scanning support
 * Browser extension integration
@@ -185,3 +163,9 @@ MONGO_URI=your_mongodb_connection_string
 * Advanced AI explainability
 * Personalized ethical preferences
 * Multi-language support
+
+---
+
+## 8. Recent Project Milestones
+
+* **Verified JWT user session mapping and route authorization handlers via PowerShell.**
