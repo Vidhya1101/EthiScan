@@ -21,7 +21,7 @@ function loadHeaderModule() {
 
     if (
         currentPage.includes("dashboard.html") ||
-        currentPage.includes("/dashboard")
+        currentPage.includes("dashboard")
     ) {
         activeNav = "dashboard";
     }
