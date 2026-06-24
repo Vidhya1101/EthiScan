@@ -1,38 +1,19 @@
 async function loadDashboard() {
-
     try {
+        const token = localStorage.getItem("ethiscan_token");
 
-        const token =
-            localStorage.getItem(
-                "token"
-            );
+        const response = await fetch("https://ethiscan-dz9i.onrender.com/api/history", {
+            headers: {
+                Authorization: token ? `Bearer ${token}` : ""
+            }
+        });
 
-        const response =
-            await fetch(
-                "/api/history",
-                {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-                    headers: {
-
-                        Authorization:
-
-                        token
-
-                        ? `Bearer ${token}`
-
-                        : ""
-                    }
-                }
-            );
-
-        const history =
-            await response.json();
-
-        const tableBody =
-            document.getElementById(
-                "searchHistoryTableBody"
-            );
-
+        const history = await response.json();
+        const tableBody = document.getElementById("searchHistoryTableBody");
         tableBody.innerHTML = "";
 
         let ethical = 0;
@@ -40,115 +21,52 @@ async function loadDashboard() {
         let unethical = 0;
 
         history.forEach(item => {
-
-            if (
-                item.status ===
-                "ETHICAL"
-            ) {
-
+            const currentStatus = item.status || "UNKNOWN";
+            
+            if (currentStatus === "ETHICAL") {
                 ethical++;
-            }
-
-            else if (
-                item.status ===
-                "WARNING"
-            ) {
-
+            } else if (currentStatus === "WARNING") {
                 warning++;
-            }
-
-            else if (
-                item.status ===
-                "UNETHICAL"
-            ) {
-
+            } else if (currentStatus === "UNETHICAL") {
                 unethical++;
             }
 
             tableBody.innerHTML += `
-
                 <tr>
-
-                    <td>
-                        ${item.query}
+                    <td><strong>${item.query || "Unknown Brand"}</strong></td>
+                    <td style="color: var(--text-muted); font-size: 0.9rem;">
+                        ${item.createdAt ? new Date(item.createdAt).toLocaleString() : "N/A"}
                     </td>
-
                     <td>
-                        ${new Date(
-                            item.createdAt
-                        ).toLocaleString()}
+                        <span class="status-badge ${currentStatus.toLowerCase()}">
+                            ${currentStatus}
+                        </span>
                     </td>
-
-                    <td>
-                        ${item.status}
-                    </td>
-
                 </tr>
             `;
         });
 
-        const total =
-            history.length;
+        const total = history.length;
 
-        document.getElementById(
-            "totalBrands"
-        ).textContent =
-            total;
+        document.getElementById("totalBrands").textContent = total;
+        document.getElementById("ethicalCount").textContent = ethical;
+        document.getElementById("warningCount").textContent = warning;
+        document.getElementById("unethicalCount").textContent = unethical;
 
-        document.getElementById(
-            "ethicalCount"
-        ).textContent =
-            ethical;
-
-        document.getElementById(
-            "warningCount"
-        ).textContent =
-            warning;
-
-        document.getElementById(
-            "unethicalCount"
-        ).textContent =
-            unethical;
-
-        document.getElementById(
-            "ethicalPct"
-        ).textContent =
-
-            total
-
-            ? `${Math.round(
-                (ethical / total) * 100
-              )}% of catalog`
-
+        document.getElementById("ethicalPct").textContent = total
+            ? `${Math.round((ethical / total) * 100)}% of catalog`
             : "0% of catalog";
 
-        document.getElementById(
-            "warningPct"
-        ).textContent =
-
-            total
-
-            ? `${Math.round(
-                (warning / total) * 100
-              )}% of catalog`
-
+        document.getElementById("warningPct").textContent = total
+            ? `${Math.round((warning / total) * 100)}% of catalog`
             : "0% of catalog";
 
-        document.getElementById(
-            "unethicalPct"
-        ).textContent =
-
-            total
-
-            ? `${Math.round(
-                (unethical / total) * 100
-              )}% of catalog`
-
+        document.getElementById("unethicalPct").textContent = total
+            ? `${Math.round((unethical / total) * 100)}% of catalog`
             : "0% of catalog";
 
     } catch (error) {
-
-        console.log(error);
+        console.error("Dashboard error:", error);
     }
 }
 
