@@ -14,7 +14,7 @@
     "cheerio": "^1.2.0",
     "cors": "^2.8.6",
     "csv-parser": "^3.2.1",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.6.1",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.3.2",

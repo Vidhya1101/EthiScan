@@ -1,3 +1,8 @@
+require("dotenv").config({ path: require("path").join(__dirname, "../.env") });
+
+const backupUri = "mongodb+srv://Volinipriya06:volinipriya06@ethiscan-db.dbij92s.mongodb.net/EthiScan";
+process.env.MONGO_URI = process.env.MONGO_URI || backupUri;
+
 const fs = require("fs");
 const path = require("path");
 const csv = require("csv-parser");
@@ -18,15 +23,12 @@ BrandSchema.index({ barcode: 1 });
 const Brand = mongoose.model("Brand", BrandSchema);
 
 const runSeeder = async () => {
-    const backupUri = "mongodb+srv://Volinipriya06:volinipriya06@ethiscan-db.dbij92s.mongodb.net/EthiScan";
-    process.env.MONGO_URI = process.env.MONGO_URI || backupUri;
-    
     await connectDatabase();
     
     console.log("Clearing historical collections...");
     await Brand.deleteMany({});
     
-    const csvFilePath = path.join(__dirname, "../brands_50k.csv");
+    const csvFilePath = path.join(__dirname, "../../brands_50k.csv");
     if (!fs.existsSync(csvFilePath)) {
         console.error(`Execution Fault: Please ensure your dataset is saved at: ${csvFilePath}`);
         process.exit(1);
@@ -61,7 +63,7 @@ const runSeeder = async () => {
                 try {
                     await Brand.insertMany(currentBatch);
                     totalInserted += currentBatch.length;
-                    console.log(`Stream pipeline progress metrics: Inserted ${totalInserted} entries...`);
+                    console.log(`Stream pipeline progress metrics pipeline progress: Inserted ${totalInserted} entries...`);
                     stream.resume();
                 } catch (err) {
                     console.error("Batch synchronization checkpoint anomaly:", err.message);
