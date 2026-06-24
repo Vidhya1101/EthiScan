@@ -57,7 +57,10 @@ function loadHeaderModule() {
             </div>
         </header>
     `;
-
+    fetch("components/header.html")
+  .then(res => res.text())
+  .then(html => document.getElementById("header-placeholder").innerHTML = html);
+  
     const loginBtn = document.getElementById("navLoginBtn");
 
     if (loginBtn) {

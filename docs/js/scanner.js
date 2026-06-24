@@ -6,12 +6,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!searchPlaceholder) return;
 
     fetch("components/search-bar.html")
-        .then(res => res.text())
-        .then(html => {
-            searchPlaceholder.innerHTML = html;
-            initializeScannerEvents();
-        })
-        .catch(err => console.log(err));
+  .then(res => res.text())
+  .then(html => document.getElementById("search-placeholder").innerHTML = html);
 });
 
 function initializeScannerEvents() {
