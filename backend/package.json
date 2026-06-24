@@ -12,6 +12,7 @@
     "axios": "^1.16.1",
     "bcryptjs": "^2.4.3",
     "cheerio": "^1.2.0",
+    "cors": "^2.8.6",
     "csv-parser": "^3.2.1",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
