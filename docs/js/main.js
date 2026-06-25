@@ -7,11 +7,13 @@ function loadHeaderModule() {
 
     if (!headerPlaceholder) return;
 
-    fetch("components/header.html")
-        .then(res => res.text())
+    fetch("/EthiScan/components/header.html")
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            return res.text();
+        })
         .then(html => {
             headerPlaceholder.innerHTML = html;
-            
             applyUserAuthStatus();
         })
         .catch(err => console.error("Header partial resolution anomaly:", err));
