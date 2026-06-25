@@ -63,13 +63,15 @@ function loadDashboardMetrics() {
     const headers = {};
     if (token) headers["Authorization"] = `Bearer ${token}`;
 
-    fetch("/api/telemetry/metrics", { headers })
+    const backendUrl = "https://ethiscan-dz9i.onrender.com";
+
+    fetch(`${backendUrl}/api/telemetry/metrics`, { headers })
         .then(res => res.json())
         .then(data => {
-            document.getElementById("totalBrandsCount").textContent = data.total;
-            document.getElementById("ethicalCount").textContent = data.ethical;
-            document.getElementById("warningCount").textContent = data.warning;
-            document.getElementById("unethicalCount").textContent = data.unethical;
+            document.getElementById("totalBrandsCount").textContent = data.total || 0;
+            document.getElementById("ethicalCount").textContent = data.ethical || 0;
+            document.getElementById("warningCount").textContent = data.warning || 0;
+            document.getElementById("unethicalCount").textContent = data.unethical || 0;
 
             const base = data.total || 1;
             document.getElementById("ethicalPct").textContent = `${Math.round((data.ethical/base)*100)}% of catalog`;
@@ -77,25 +79,29 @@ function loadDashboardMetrics() {
             document.getElementById("unethicalPct").textContent = `${Math.round((data.unethical/base)*100)}% of catalog`;
         });
 
-    fetch("/api/telemetry/history", { headers })
+    fetch(`${backendUrl}/api/telemetry/history`, { headers })
         .then(res => res.json())
         .then(data => {
             const searchBody = document.getElementById("searchHistoryTableBody");
-            searchBody.innerHTML = data.searches.map(s => `
-                <tr>
-                    <td>${s.query}</td>
-                    <td>${new Date(s.timestamp).toLocaleTimeString()}</td>
-                    <td><span style="color:#10b981">${s.status}</span></td>
-                </tr>
-            `).join("");
+            if (searchBody && data.searches) {
+                searchBody.innerHTML = data.searches.map(s => `
+                    <tr>
+                        <td>${s.query}</td>
+                        <td>${new Date(s.timestamp).toLocaleTimeString()}</td>
+                        <td><span style="color:#10b981">${s.status}</span></td>
+                    </tr>
+                `).join("");
+            }
 
             const crowdBody = document.getElementById("crowdRequestsTableBody");
-            crowdBody.innerHTML = data.requests.map(r => `
-                <tr>
-                    <td>${r.item}</td>
-                    <td>${new Date(r.timestamp).toLocaleDateString()}</td>
-                    <td><span style="color:#f59e0b; font-weight:600;">${r.status.toUpperCase()}</span></td>
-                </tr>
-            `).join("");
+            if (crowdBody && data.requests) {
+                crowdBody.innerHTML = data.requests.map(r => `
+                    <tr>
+                        <td>${r.item}</td>
+                        <td>${new Date(r.timestamp).toLocaleDateString()}</td>
+                        <td><span style="color:#f59e0b; font-weight:600;">${r.status.toUpperCase()}</span></td>
+                    </tr>
+                `).join("");
+            }
         });
 }
