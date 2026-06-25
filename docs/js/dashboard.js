@@ -2,19 +2,11 @@ async function loadDashboard() {
     try {
         const token = localStorage.getItem("ethiscan_token");
 
-        const backendUrl = window.location.hostname.includes("localhost") 
-            ? "http://localhost:5000" 
-            : "https://ethiscan-dz9i.onrender.com";
-
-        const response = await fetch(`${backendUrl}/api/history`, {
+        const response = await fetch("https://ethiscan-dz9i.onrender.com/api/analytics/history", {
             headers: {
                 Authorization: token ? `Bearer ${token}` : ""
             }
         });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
 
         const history = await response.json();
         const tableBody = document.getElementById("searchHistoryTableBody");
@@ -25,25 +17,23 @@ async function loadDashboard() {
         let unethical = 0;
 
         history.forEach(item => {
-            const currentStatus = item.status || "UNKNOWN";
-            
-            if (currentStatus === "ETHICAL") {
+            if (item.statusResult === "Ethical") {
                 ethical++;
-            } else if (currentStatus === "WARNING") {
+            } else if (item.statusResult === "Warning") {
                 warning++;
-            } else if (currentStatus === "UNETHICAL") {
+            } else if (item.statusResult === "Unethical") {
                 unethical++;
             }
 
             tableBody.innerHTML += `
                 <tr>
-                    <td><strong>${item.query || "Unknown Brand"}</strong></td>
+                    <td><strong>${item.brandName}</strong></td>
                     <td style="color: var(--text-muted); font-size: 0.9rem;">
-                        ${item.createdAt ? new Date(item.createdAt).toLocaleString() : "N/A"}
+                        ${new Date(item.timestamp).toLocaleString()}
                     </td>
                     <td>
-                        <span class="status-badge ${currentStatus.toLowerCase()}">
-                            ${currentStatus}
+                        <span class="status-badge ${item.statusResult.toLowerCase()}">
+                            ${item.statusResult}
                         </span>
                     </td>
                 </tr>
@@ -70,7 +60,7 @@ async function loadDashboard() {
             : "0% of catalog";
 
     } catch (error) {
-        console.error("Dashboard error:", error);
+        console.log(error);
     }
 }
 

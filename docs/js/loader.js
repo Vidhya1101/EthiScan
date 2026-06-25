@@ -9,14 +9,10 @@ function initializeAuthForms() {
     const loginForm = document.getElementById("loginForm");
     const registerForm = document.getElementById("registerForm");
 
-    const backendUrl = window.location.hostname.includes("localhost") 
-        ? "http://localhost:5000" 
-        : "https://ethiscan-dz9i.onrender.com";
-
     if (loginForm) {
         loginForm.addEventListener("submit", (e) => {
             e.preventDefault();
-            fetch(`${backendUrl}/api/auth/login`, {
+            fetch("https://ethiscan-dz9i.onrender.com/api/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -40,7 +36,7 @@ function initializeAuthForms() {
     if (registerForm) {
         registerForm.addEventListener("submit", (e) => {
             e.preventDefault();
-            fetch(`${backendUrl}/api/auth/register`, {
+            fetch("https://ethiscan-dz9i.onrender.com/api/auth/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -66,16 +62,14 @@ function loadDashboardMetrics() {
     const token = localStorage.getItem("ethiscan_token");
     const headers = {};
     if (token) headers["Authorization"] = `Bearer ${token}`;
-    const backendUrl = window.location.hostname.includes("localhost") 
-        ? "http://localhost:5000" 
-        : "https://ethiscan-dz9i.onrender.com";
-    fetch(`${backendUrl}/api/telemetry/metrics`, { headers })
+
+    fetch("https://ethiscan-dz9i.onrender.com/api/telemetry/metrics", { headers })
         .then(res => res.json())
         .then(data => {
-            document.getElementById("totalBrandsCount").textContent = data.total || 0;
-            document.getElementById("ethicalCount").textContent = data.ethical || 0;
-            document.getElementById("warningCount").textContent = data.warning || 0;
-            document.getElementById("unethicalCount").textContent = data.unethical || 0;
+            document.getElementById("totalBrandsCount").textContent = data.total;
+            document.getElementById("ethicalCount").textContent = data.ethical;
+            document.getElementById("warningCount").textContent = data.warning;
+            document.getElementById("unethicalCount").textContent = data.unethical;
 
             const base = data.total || 1;
             document.getElementById("ethicalPct").textContent = `${Math.round((data.ethical/base)*100)}% of catalog`;
@@ -83,29 +77,25 @@ function loadDashboardMetrics() {
             document.getElementById("unethicalPct").textContent = `${Math.round((data.unethical/base)*100)}% of catalog`;
         });
 
-    fetch(`${backendUrl}/api/telemetry/history`, { headers })
+    fetch("https://ethiscan-dz9i.onrender.com/api/telemetry/history", { headers })
         .then(res => res.json())
         .then(data => {
             const searchBody = document.getElementById("searchHistoryTableBody");
-            if (searchBody && data.searches) {
-                searchBody.innerHTML = data.searches.map(s => `
-                    <tr>
-                        <td>${s.query}</td>
-                        <td>${new Date(s.timestamp).toLocaleTimeString()}</td>
-                        <td><span style="color:#10b981">${s.status}</span></td>
-                    </tr>
-                `).join("");
-            }
+            searchBody.innerHTML = data.searches.map(s => `
+                <tr>
+                    <td>${s.query}</td>
+                    <td>${new Date(s.timestamp).toLocaleTimeString()}</td>
+                    <td><span style="color:#10b981">${s.status}</span></td>
+                </tr>
+            `).join("");
 
             const crowdBody = document.getElementById("crowdRequestsTableBody");
-            if (crowdBody && data.requests) {
-                crowdBody.innerHTML = data.requests.map(r => `
-                    <tr>
-                        <td>${r.item}</td>
-                        <td>${new Date(r.timestamp).toLocaleDateString()}</td>
-                        <td><span style="color:#f59e0b; font-weight:600;">${r.status.toUpperCase()}</span></td>
-                    </tr>
-                `).join("");
-            }
+            crowdBody.innerHTML = data.requests.map(r => `
+                <tr>
+                    <td>${r.item}</td>
+                    <td>${new Date(r.timestamp).toLocaleDateString()}</td>
+                    <td><span style="color:#f59e0b; font-weight:600;">${r.status.toUpperCase()}</span></td>
+                </tr>
+            `).join("");
         });
 }

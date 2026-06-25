@@ -1,8 +1,3 @@
-require("dotenv").config({ path: require("path").join(__dirname, "../.env") });
-
-const backupUri = "mongodb+srv://Volinipriya06:volinipriya06@ethiscan-db.dbij92s.mongodb.net/EthiScan";
-process.env.MONGO_URI = process.env.MONGO_URI || backupUri;
-
 const fs = require("fs");
 const path = require("path");
 const csv = require("csv-parser");
@@ -23,12 +18,19 @@ BrandSchema.index({ barcode: 1 });
 const Brand = mongoose.model("Brand", BrandSchema);
 
 const runSeeder = async () => {
+    const backupUri = "mongodb+srv://Volinipriya06:volinipriya06@ethiscan-db.dbij92s.mongodb.net/EthiScan";
+<<<<<<< HEAD
+    process.env.MONGO_URI = process.env.MONGO_URI || backupUri;
+=======
+    process.env.MONGODB_URI = process.env.MONGODB_URI || backupUri;
+>>>>>>> 6add69a (Initial EthiScan Upload)
+    
     await connectDatabase();
     
     console.log("Clearing historical collections...");
     await Brand.deleteMany({});
     
-    const csvFilePath = path.join(__dirname, "../../brands_50k.csv");
+    const csvFilePath = path.join(__dirname, "../brands_50k.csv");
     if (!fs.existsSync(csvFilePath)) {
         console.error(`Execution Fault: Please ensure your dataset is saved at: ${csvFilePath}`);
         process.exit(1);
@@ -40,11 +42,9 @@ const runSeeder = async () => {
 
     console.log("Initializing high-velocity stream processing for 50k dataset...");
 
-    const stream = fs.createReadStream(csvFilePath);
-
-    stream
+    fs.createReadStream(csvFilePath)
         .pipe(csv())
-        .on("data", async (row) => {
+        .on("data", (row) => {
             batch.push({
                 name: row.name || row.Name || "Unknown Brand",
                 barcode: row.barcode || row.Barcode || row.upc || "000000000000",
@@ -55,30 +55,24 @@ const runSeeder = async () => {
             });
 
             if (batch.length === BATCH_SIZE) {
-                stream.pause();
-
                 const currentBatch = [...batch];
                 batch = [];
-
-                try {
-                    await Brand.insertMany(currentBatch);
-                    totalInserted += currentBatch.length;
-                    console.log(`Stream pipeline progress metrics pipeline progress: Inserted ${totalInserted} entries...`);
-                    stream.resume();
-                } catch (err) {
-                    console.error("Batch synchronization checkpoint anomaly:", err.message);
-                    stream.resume();
-                }
+                fs.createReadStream(csvFilePath).pause();
+                Brand.insertMany(currentBatch)
+                    .then(() => {
+                        totalInserted += currentBatch.length;
+                        console.log(`Stream pipeline progress metrics: Inserted ${totalInserted} entries...`);
+                        fs.createReadStream(csvFilePath).resume();
+                    })
+                    .catch(err => {
+                        console.error("Batch synchronization checkpoint anomaly:", err.message);
+                    });
             }
         })
         .on("end", async () => {
             if (batch.length > 0) {
-                try {
-                    await Brand.insertMany(batch);
-                    totalInserted += batch.length;
-                } catch (err) {
-                    console.error("Final batch insert anomaly:", err.message);
-                }
+                await Brand.insertMany(batch);
+                totalInserted += batch.length;
             }
             console.log(`\nSUCCESS: Database cluster completely mapped. Total records indexed: ${totalInserted}`);
             process.exit(0);

@@ -5,17 +5,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!searchPlaceholder) return;
 
-    const backendUrl = window.location.hostname.includes("localhost") 
-    ? "http://localhost:5000" 
-    : "https://ethiscan-dz9i.onrender.com";
-    fetch(`${backendUrl}/api/analyze`, {  // or whatever your backend route is
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ brand: val })
-})
-    fetch("components/search-bar.html")
-  .then(res => res.text())
-  .then(html => document.getElementById("search-placeholder").innerHTML = html);
+    fetch("/components/search-bar.html")
+
+        .then(res => res.text())
+
+        .then(html => {
+
+            searchPlaceholder.innerHTML = html;
+
+            initializeScannerEvents();
+        })
+
+        .catch(err => console.log(err));
 });
 
 function initializeScannerEvents() {
@@ -34,13 +35,13 @@ function initializeScannerEvents() {
 
         if (!val) return;
 
-
         const resPlaceholder =
             document.getElementById("result-placeholder");
 
         if (resPlaceholder) {
 
             resPlaceholder.innerHTML = `
+
                 <div class="result-card-container animate-fade-in"
                     style="
                         background-color:#11131c;
@@ -50,63 +51,68 @@ function initializeScannerEvents() {
                         margin-top:24px;
                         text-align:center;
                     ">
+
                     <div style="
                         font-size:18px;
                         font-weight:600;
                     ">
                         Analyzing Brand Ethics...
                     </div>
+
                 </div>
             `;
         }
 
         try {
 
-            const backendUrl = window.location.hostname.includes("localhost") 
-                ? "http://localhost:5000" 
-                : "https://ethiscan-dz9i.onrender.com";
-
-            const response = await fetch(`${backendUrl}/api/analyze`, { 
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ brand: val })
-            });
+            const response = await fetch(
+                `/api/brands/${encodeURIComponent(val)}`
+            );
 
             const data = await response.json();
 
             if (!response.ok || !data.success) {
-                resPlaceholder.innerHTML = `
-                    <div style="
-                        background:#111827;
-                        border:1px solid #ef4444;
-                        padding:24px;
-                        border-radius:16px;
-                        margin-top:24px;
-                        color:white;
-                    ">
-                        <h3 style="
-                            color:#ef4444;
-                            margin-bottom:12px;
-                        ">
-                            Analysis Failed
-                        </h3>
-                        <p style="
-                            color:#9ca3af;
-                        ">
-                            Unable to analyze this brand right now.
-                        </p>
-                    </div>
-                `;
-                return;
-            }
+
+    resPlaceholder.innerHTML = `
+
+        <div style="
+            background:#111827;
+            border:1px solid #ef4444;
+            padding:24px;
+            border-radius:16px;
+            margin-top:24px;
+            color:white;
+        ">
+
+            <h3 style="
+                color:#ef4444;
+                margin-bottom:12px;
+            ">
+                Analysis Failed
+            </h3>
+
+            <p style="
+                color:#9ca3af;
+            ">
+                Unable to analyze this brand right now.
+            </p>
+
+        </div>
+    `;
+
+    return;
+}
 
             renderResultCard(data.brand);
 
         } catch (err) {
+
             console.log(err);
 
             if (resPlaceholder) {
+
                 resPlaceholder.innerHTML = `
+
                     <div class="result-card-container animate-fade-in"
                         style="
                             background-color:#11131c;
@@ -116,6 +122,7 @@ function initializeScannerEvents() {
                             margin-top:24px;
                             text-align:center;
                         ">
+
                         <div style="
                             font-size:18px;
                             font-weight:600;
@@ -123,6 +130,7 @@ function initializeScannerEvents() {
                         ">
                             Server Error
                         </div>
+
                     </div>
                 `;
             }
@@ -134,20 +142,27 @@ function initializeScannerEvents() {
     });
 
     input.addEventListener("keypress", (e) => {
+
         if (e.key === "Enter") {
             executeAnalysis(input.value);
         }
     });
 
     document.querySelectorAll(".suggestion-tag")
+
         .forEach(tag => {
+
             tag.addEventListener("click", (e) => {
-                input.value = e.target.textContent;
-                executeAnalysis(e.target.textContent);
+
+                    input.value =
+                        e.target.textContent;
+
+                    executeAnalysis(
+                        e.target.textContent
+                    );
             });
         });
 }
-
 function renderResultCard(brand) {
 
     const resPlaceholder =
@@ -162,15 +177,19 @@ function renderResultCard(brand) {
     if (score >= 70) {
         accentColor = "#10b981";
     }
+
     else if (score >= 40) {
         accentColor = "#f59e0b";
     }
+
     else {
         accentColor = "#ef4444";
     }
 
     resPlaceholder.innerHTML = `
+
         <div class="result-card-container animate-fade-in"
+
             style="
                 background:#0f1117;
                 border:1px solid #1f2430;
@@ -227,7 +246,9 @@ function renderResultCard(brand) {
                         font-size:13px;
                         font-weight:600;
                     ">
+
                         ${brand.sustainability || "Unknown"}
+
                     </div>
 
                 </div>
@@ -245,7 +266,9 @@ function renderResultCard(brand) {
                     color:${accentColor};
                     flex-shrink:0;
                 ">
+
                     ${score}
+
                 </div>
 
             </div>
@@ -260,12 +283,16 @@ function renderResultCard(brand) {
                 line-height:1.8;
                 font-size:14px;
             ">
-                ${brand.description || "This brand was analyzed using live ethical evaluation and sustainability indicators."}
+
+                ${brand.description ||
+                "This brand was analyzed using live ethical evaluation and sustainability indicators."}
+
             </div>
 
             <div style="
                 display:grid;
-                grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
+                grid-template-columns:
+                repeat(auto-fit,minmax(280px,1fr));
                 gap:20px;
                 margin-top:28px;
             ">
@@ -276,6 +303,7 @@ function renderResultCard(brand) {
                     border-radius:16px;
                     padding:20px;
                 ">
+
                     <h3 style="
                         font-size:18px;
                         margin-bottom:16px;
@@ -283,13 +311,17 @@ function renderResultCard(brand) {
                     ">
                         Positive Indicators
                     </h3>
+
                     <div style="
                         color:#9ca3af;
                         line-height:1.8;
                         font-size:14px;
                     ">
+
                         ${brand.pros || "No positive indicators found."}
+
                     </div>
+
                 </div>
 
                 <div style="
@@ -298,6 +330,7 @@ function renderResultCard(brand) {
                     border-radius:16px;
                     padding:20px;
                 ">
+
                     <h3 style="
                         font-size:18px;
                         margin-bottom:16px;
@@ -305,21 +338,31 @@ function renderResultCard(brand) {
                     ">
                         Ethical Concerns
                     </h3>
+
                     <div style="
                         color:#9ca3af;
                         line-height:1.8;
                         font-size:14px;
                     ">
+
                         ${brand.cons || "No ethical concerns found."}
+
                     </div>
+
                 </div>
 
             </div>
 
             ${
-                brand.smartAlternatives && brand.smartAlternatives.length > 0
+                brand.smartAlternatives &&
+                brand.smartAlternatives.length > 0
+
                 ? `
-                <div style="margin-top:28px;">
+
+                <div style="
+                    margin-top:28px;
+                ">
+
                     <h3 style="
                         font-size:20px;
                         margin-bottom:18px;
@@ -327,18 +370,23 @@ function renderResultCard(brand) {
                     ">
                         Better Ethical Alternatives
                     </h3>
+
                     <div style="
                         display:grid;
-                        grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+                        grid-template-columns:
+                        repeat(auto-fit,minmax(220px,1fr));
                         gap:16px;
                     ">
+
                         ${brand.smartAlternatives.map(item => `
+
                             <div style="
                                 background:#151926;
                                 border:1px solid #222838;
                                 border-radius:16px;
                                 padding:18px;
                             ">
+
                                 <div style="
                                     font-size:18px;
                                     font-weight:600;
@@ -347,17 +395,24 @@ function renderResultCard(brand) {
                                 ">
                                     ${item.brandName}
                                 </div>
+
                                 <div style="
                                     color:#10b981;
                                     font-size:14px;
                                     font-weight:600;
                                 ">
-                                    Ethical Score • ${item.ethicalScore}
+                                    Ethical Score •
+                                    ${item.ethicalScore}
                                 </div>
+
                             </div>
+
                         `).join("")}
+
                     </div>
+
                 </div>
+
                 `
                 : ""
             }
