@@ -2,7 +2,11 @@ async function loadDashboard() {
     try {
         const token = localStorage.getItem("ethiscan_token");
 
-        const response = await fetch("https://ethiscan-dz9i.onrender.com/api/history", {
+        const backendUrl = window.location.hostname.includes("localhost") 
+            ? "http://localhost:5000" 
+            : "https://ethiscan-dz9i.onrender.com";
+
+        const response = await fetch(`${backendUrl}/api/history`, {
             headers: {
                 Authorization: token ? `Bearer ${token}` : ""
             }

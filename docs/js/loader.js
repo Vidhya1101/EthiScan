@@ -9,10 +9,14 @@ function initializeAuthForms() {
     const loginForm = document.getElementById("loginForm");
     const registerForm = document.getElementById("registerForm");
 
+    const backendUrl = window.location.hostname.includes("localhost") 
+        ? "http://localhost:5000" 
+        : "https://ethiscan-dz9i.onrender.com";
+
     if (loginForm) {
         loginForm.addEventListener("submit", (e) => {
             e.preventDefault();
-            fetch("/api/auth/login", {
+            fetch(`${backendUrl}/api/auth/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -36,7 +40,7 @@ function initializeAuthForms() {
     if (registerForm) {
         registerForm.addEventListener("submit", (e) => {
             e.preventDefault();
-            fetch("/api/auth/register", {
+            fetch(`${backendUrl}/api/auth/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

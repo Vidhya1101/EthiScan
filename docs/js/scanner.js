@@ -5,6 +5,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!searchPlaceholder) return;
 
+    const backendUrl = window.location.hostname.includes("localhost") 
+    ? "http://localhost:5000" 
+    : "https://ethiscan-dz9i.onrender.com";
+    fetch(`${backendUrl}/api/analyze`, {  // or whatever your backend route is
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ brand: val })
+})
     fetch("components/search-bar.html")
   .then(res => res.text())
   .then(html => document.getElementById("search-placeholder").innerHTML = html);
@@ -25,6 +33,7 @@ function initializeScannerEvents() {
         const val = queryValue.trim();
 
         if (!val) return;
+
 
         const resPlaceholder =
             document.getElementById("result-placeholder");
@@ -53,14 +62,19 @@ function initializeScannerEvents() {
 
         try {
 
-            const response = await fetch(
-                `https://ethiscan-dz9i.onrender.com/api/brands/${encodeURIComponent(val)}`
-            );
+            const backendUrl = window.location.hostname.includes("localhost") 
+                ? "http://localhost:5000" 
+                : "https://ethiscan-dz9i.onrender.com";
+
+            const response = await fetch(`${backendUrl}/api/analyze`, { 
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ brand: val })
+            });
 
             const data = await response.json();
 
             if (!response.ok || !data.success) {
-
                 resPlaceholder.innerHTML = `
                     <div style="
                         background:#111827;
@@ -89,11 +103,9 @@ function initializeScannerEvents() {
             renderResultCard(data.brand);
 
         } catch (err) {
-
             console.log(err);
 
             if (resPlaceholder) {
-
                 resPlaceholder.innerHTML = `
                     <div class="result-card-container animate-fade-in"
                         style="
