@@ -7,7 +7,7 @@ function loadHeaderModule() {
 
     if (!headerPlaceholder) return;
 
-    fetch("/EthiScan/components/header.html")
+    fetch("components/header.html")
         .then(res => {
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
             return res.text();

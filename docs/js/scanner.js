@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!searchPlaceholder) return;
 
-    fetch("/EthiScan/components/search-bar.html")
+    fetch("components/search-bar.html")
   .then(res => res.text())
   .then(html => document.getElementById("search-placeholder").innerHTML = html);
 });
