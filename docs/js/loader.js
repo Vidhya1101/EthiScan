@@ -66,9 +66,9 @@ function loadDashboardMetrics() {
     const token = localStorage.getItem("ethiscan_token");
     const headers = {};
     if (token) headers["Authorization"] = `Bearer ${token}`;
-
-    const backendUrl = "https://ethiscan-dz9i.onrender.com";
-
+    const backendUrl = window.location.hostname.includes("localhost") 
+        ? "http://localhost:5000" 
+        : "https://ethiscan-dz9i.onrender.com";
     fetch(`${backendUrl}/api/telemetry/metrics`, { headers })
         .then(res => res.json())
         .then(data => {
