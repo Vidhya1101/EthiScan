@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EthiScan - Logged Out</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/animations.css">
+</head>
+<body>
+
+    <header class="navbar">
+        <a href="/" class="nav-brand"><span class="brand-icon">ES</span> EthiScan</a>
+    </header>
+
+    <div class="logout-layout-wrapper">
+        <div class="logout-box">
+            <div class="logout-icon-wrapper">
+                <svg class="logout-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+            </div>
+            <h2 class="logout-title">Logged Out</h2>
+            <p class="logout-subtitle">You have successfully signed out of your secure session. Your locally cached verification profile has been cleared.</p>
+            <a href="/" class="btn-logout-redirect">Return Home</a>
+        </div>
+    </div>
+
+    <script>
+        localStorage.removeItem('ethiscan_user');
+    </script>
+</body>
+</html>

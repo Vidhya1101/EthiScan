@@ -65,16 +65,9 @@ function initializeScannerEvents() {
 
         try {
 
-            const token = localStorage.getItem("ethiscan_token");
-
-const response = await fetch(
-    `/api/brands/${encodeURIComponent(val)}`,
-    {
-        headers: {
-            Authorization: token ? `Bearer ${token}` : ""
-        }
-    }
-);
+            const response = await fetch(
+                `/api/brands/${encodeURIComponent(val)}`
+            );
 
             const data = await response.json();
 

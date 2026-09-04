@@ -1,0 +1,15 @@
+{
+  "name": "ethiscan",
+  "version": "1.0.0",
+  "description": "Full-stack sustainability intelligence graph platform",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "seed": "node backend/db/seeder.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.2.0"
+  }
+}

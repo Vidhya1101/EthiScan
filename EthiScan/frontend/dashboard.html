@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EthiScan - Dashboard</title>
+    <base href="/">
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/animations.css">
@@ -47,35 +48,9 @@
 
         <div class="dashboard-columns">
             <div class="board-container">
-                <div class="board-container">
-
-            <div class="board-header" style="
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 1rem;
-    ">
-        <h3>Your Search History</h3>
-
-        <button
-            id="clearHistoryBtn"
-            type="button"
-            style="
-                background: transparent;
-                border: 1px solid #ff4d4d;
-                color: #ff4d4d;
-                padding: 0.55rem 1rem;
-                border-radius: 8px;
-                cursor: pointer;
-                font-weight: 600;
-                transition: 0.2s;
-            "
-            onmouseover="this.style.background='#ff4d4d'; this.style.color='#fff';"
-            onmouseout="this.style.background='transparent'; this.style.color='#ff4d4d';"
-        >
-            Clear History
-        </button>
-    </div>
+                <div class="board-header">
+                    <h3>Your Search History</h3>
+                </div>
                 <table class="custom-table">
                     <thead>
                         <tr>
@@ -90,8 +65,8 @@
             </div>
     </main>
 
-    <script src="./js/main.js"></script>
-    <script src="./js/loader.js"></script>
-    <script src="./js/dashboard.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/loader.js"></script>
+    <script src="/js/dashboard.js"></script>
 </body>
 </html>

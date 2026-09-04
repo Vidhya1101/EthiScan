@@ -1,0 +1,34 @@
+<div class="search-section">
+    <div class="search-input-wrapper">
+        <div class="search-icon-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h10M7 12h10M7 17h10"/></svg>
+        </div>
+        <input type="text" id="brandSearchInput" placeholder="Search a brand name or scan/enter a barcode...">
+        <button id="analyzeBtn" class="analyze-button">ANALYZE</button>
+    </div>
+    <div class="search-suggestions">
+        <span>Try:</span>
+        <button class="suggestion-tag">Patagonia</button>
+        <button class="suggestion-tag">Nestle</button>
+        <button class="suggestion-tag">Fairphone</button>
+        <button class="suggestion-tag">Coca-Cola</button>
+        <button class="suggestion-tag" id="triggerUnknown">MysteryNewBrand (unknown)</button>
+    </div>
+</div>
+
+<div id="unknownBrandModal" class="custom-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Brand Not Found</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>The brand <strong id="missingBrandName">"Unknown"</strong> is currently missing from our verified ecosystem catalog.</p>
+            <p>Would you like to log a live crowdsourced research inquiry tracking request for our data verification team?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary close-modal">Cancel</button>
+            <button class="btn-primary" id="submitBrandRequest">Submit Tracking Request</button>
+        </div>
+    </div>
+</div>
