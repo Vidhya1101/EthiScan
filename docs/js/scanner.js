@@ -1,47 +1,41 @@
 document.addEventListener("DOMContentLoaded", () => {
-
-    const searchPlaceholder =
-        document.getElementById("search-placeholder");
+    const searchPlaceholder = document.getElementById("search-placeholder");
 
     if (!searchPlaceholder) return;
 
-    fetch("/components/search-bar.html")
+    const BASE_PATH = window.location.hostname === "localhost" ? "" : "/EthiScan";
 
-        .then(res => res.text())
-
+    fetch(`${BASE_PATH}/components/search-bar.html`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Failed to load search bar");
+            }
+            return response.text();
+        })
         .then(html => {
-
             searchPlaceholder.innerHTML = html;
-
             initializeScannerEvents();
         })
-
-        .catch(err => console.log(err));
+        .catch(error => {
+            console.error("Search bar loading error:", error);
+        });
 });
 
 function initializeScannerEvents() {
-
-    const input =
-        document.getElementById("brandSearchInput");
-
-    const btn =
-        document.getElementById("analyzeBtn");
+    const input = document.getElementById("brandSearchInput");
+    const btn = document.getElementById("analyzeBtn");
 
     if (!input || !btn) return;
 
     async function executeAnalysis(queryValue) {
-
         const val = queryValue.trim();
 
         if (!val) return;
 
-        const resPlaceholder =
-            document.getElementById("result-placeholder");
+        const resPlaceholder = document.getElementById("result-placeholder");
 
         if (resPlaceholder) {
-
             resPlaceholder.innerHTML = `
-
                 <div class="result-card-container animate-fade-in"
                     style="
                         background-color:#11131c;
@@ -51,85 +45,75 @@ function initializeScannerEvents() {
                         margin-top:24px;
                         text-align:center;
                     ">
-
                     <div style="
                         font-size:18px;
                         font-weight:600;
                     ">
                         Analyzing Brand Ethics...
                     </div>
-
                 </div>
             `;
         }
 
         try {
-
             const token = localStorage.getItem("ethiscan_token");
 
-const response = await fetch(
-    `/api/brands/${encodeURIComponent(val)}`,
-    {
-        headers: {
-            Authorization: token ? `Bearer ${token}` : ""
-        }
-    }
-);
+            const response = await fetch(
+                `https://ethiscan-dz9i.onrender.com/api/brands/${encodeURIComponent(val)}`,
+                {
+                    headers: {
+                        Authorization: token ? `Bearer ${token}` : ""
+                    }
+                }
+            );
 
             const data = await response.json();
 
             if (!response.ok || !data.success) {
+                if (resPlaceholder) {
+                    resPlaceholder.innerHTML = `
+                        <div style="
+                            background:#111827;
+                            border:1px solid #ef4444;
+                            padding:24px;
+                            border-radius:16px;
+                            margin-top:24px;
+                            color:white;
+                        ">
+                            <h3 style="
+                                color:#ef4444;
+                                margin-bottom:12px;
+                            ">
+                                Analysis Failed
+                            </h3>
 
-    resPlaceholder.innerHTML = `
+                            <p style="
+                                color:#9ca3af;
+                            ">
+                                ${data.message || "Unable to analyze this brand right now."}
+                            </p>
+                        </div>
+                    `;
+                }
 
-        <div style="
-            background:#111827;
-            border:1px solid #ef4444;
-            padding:24px;
-            border-radius:16px;
-            margin-top:24px;
-            color:white;
-        ">
-
-            <h3 style="
-                color:#ef4444;
-                margin-bottom:12px;
-            ">
-                Analysis Failed
-            </h3>
-
-            <p style="
-                color:#9ca3af;
-            ">
-                Unable to analyze this brand right now.
-            </p>
-
-        </div>
-    `;
-
-    return;
-}
+                return;
+            }
 
             renderResultCard(data.brand);
-
-        } catch (err) {
-
-            console.log(err);
+        } catch (error) {
+            console.error("Analysis error:", error);
 
             if (resPlaceholder) {
-
                 resPlaceholder.innerHTML = `
-
                     <div class="result-card-container animate-fade-in"
                         style="
                             background-color:#11131c;
-                            border:1px solid #1e2230;
+                            border:1px solid #ef4444;
                             padding:32px;
                             border-radius:12px;
                             margin-top:24px;
                             text-align:center;
                         ">
-
                         <div style="
                             font-size:18px;
                             font-weight:600;
@@ -138,6 +122,12 @@ const response = await fetch(
                             Server Error
                         </div>
 
+                        <p style="
+                            color:#9ca3af;
+                            margin-top:10px;
+                        ">
+                            Unable to connect to the EthiScan server.
+                        </p>
                     </div>
                 `;
             }
@@ -148,55 +138,39 @@ const response = await fetch(
         executeAnalysis(input.value);
     });
 
-    input.addEventListener("keypress", (e) => {
-
-        if (e.key === "Enter") {
+    input.addEventListener("keypress", event => {
+        if (event.key === "Enter") {
             executeAnalysis(input.value);
         }
     });
 
-    document.querySelectorAll(".suggestion-tag")
-
-        .forEach(tag => {
-
-            tag.addEventListener("click", (e) => {
-
-                    input.value =
-                        e.target.textContent;
-
-                    executeAnalysis(
-                        e.target.textContent
-                    );
-            });
+    document.querySelectorAll(".suggestion-tag").forEach(tag => {
+        tag.addEventListener("click", event => {
+            input.value = event.target.textContent;
+            executeAnalysis(event.target.textContent);
         });
+    });
 }
-function renderResultCard(brand) {
 
-    const resPlaceholder =
-        document.getElementById("result-placeholder");
+function renderResultCard(brand) {
+    const resPlaceholder = document.getElementById("result-placeholder");
 
     if (!resPlaceholder) return;
 
     let accentColor = "#f59e0b";
 
-    const score = brand.ethicalScore || 0;
+    const score = Number(brand.ethicalScore) || 0;
 
     if (score >= 70) {
         accentColor = "#10b981";
-    }
-
-    else if (score >= 40) {
+    } else if (score >= 40) {
         accentColor = "#f59e0b";
-    }
-
-    else {
+    } else {
         accentColor = "#ef4444";
     }
 
     resPlaceholder.innerHTML = `
-
         <div class="result-card-container animate-fade-in"
-
             style="
                 background:#0f1117;
                 border:1px solid #1f2430;
@@ -253,9 +227,7 @@ function renderResultCard(brand) {
                         font-size:13px;
                         font-weight:600;
                     ">
-
                         ${brand.sustainability || "Unknown"}
-
                     </div>
 
                 </div>
@@ -273,9 +245,7 @@ function renderResultCard(brand) {
                     color:${accentColor};
                     flex-shrink:0;
                 ">
-
                     ${score}
-
                 </div>
 
             </div>
@@ -290,16 +260,12 @@ function renderResultCard(brand) {
                 line-height:1.8;
                 font-size:14px;
             ">
-
-                ${brand.description ||
-                "This brand was analyzed using live ethical evaluation and sustainability indicators."}
-
+                ${brand.description || "This brand was analyzed using live ethical evaluation and sustainability indicators."}
             </div>
 
             <div style="
                 display:grid;
-                grid-template-columns:
-                repeat(auto-fit,minmax(280px,1fr));
+                grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
                 gap:20px;
                 margin-top:28px;
             ">
@@ -310,7 +276,6 @@ function renderResultCard(brand) {
                     border-radius:16px;
                     padding:20px;
                 ">
-
                     <h3 style="
                         font-size:18px;
                         margin-bottom:16px;
@@ -324,11 +289,8 @@ function renderResultCard(brand) {
                         line-height:1.8;
                         font-size:14px;
                     ">
-
                         ${brand.pros || "No positive indicators found."}
-
                     </div>
-
                 </div>
 
                 <div style="
@@ -337,7 +299,6 @@ function renderResultCard(brand) {
                     border-radius:16px;
                     padding:20px;
                 ">
-
                     <h3 style="
                         font-size:18px;
                         margin-bottom:16px;
@@ -351,77 +312,59 @@ function renderResultCard(brand) {
                         line-height:1.8;
                         font-size:14px;
                     ">
-
                         ${brand.cons || "No ethical concerns found."}
-
                     </div>
-
                 </div>
 
             </div>
 
             ${
-                brand.smartAlternatives &&
+                Array.isArray(brand.smartAlternatives) &&
                 brand.smartAlternatives.length > 0
-
-                ? `
-
-                <div style="
-                    margin-top:28px;
-                ">
-
-                    <h3 style="
-                        font-size:20px;
-                        margin-bottom:18px;
-                        color:white;
-                    ">
-                        Better Ethical Alternatives
-                    </h3>
-
-                    <div style="
-                        display:grid;
-                        grid-template-columns:
-                        repeat(auto-fit,minmax(220px,1fr));
-                        gap:16px;
-                    ">
-
-                        ${brand.smartAlternatives.map(item => `
+                    ? `
+                        <div style="margin-top:28px;">
+                            <h3 style="
+                                font-size:20px;
+                                margin-bottom:18px;
+                                color:white;
+                            ">
+                                Better Ethical Alternatives
+                            </h3>
 
                             <div style="
-                                background:#151926;
-                                border:1px solid #222838;
-                                border-radius:16px;
-                                padding:18px;
+                                display:grid;
+                                grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+                                gap:16px;
                             ">
+                                ${brand.smartAlternatives.map(item => `
+                                    <div style="
+                                        background:#151926;
+                                        border:1px solid #222838;
+                                        border-radius:16px;
+                                        padding:18px;
+                                    ">
+                                        <div style="
+                                            font-size:18px;
+                                            font-weight:600;
+                                            color:white;
+                                            margin-bottom:10px;
+                                        ">
+                                            ${item.brandName || "Unknown"}
+                                        </div>
 
-                                <div style="
-                                    font-size:18px;
-                                    font-weight:600;
-                                    color:white;
-                                    margin-bottom:10px;
-                                ">
-                                    ${item.brandName}
-                                </div>
-
-                                <div style="
-                                    color:#10b981;
-                                    font-size:14px;
-                                    font-weight:600;
-                                ">
-                                    Ethical Score •
-                                    ${item.ethicalScore}
-                                </div>
-
+                                        <div style="
+                                            color:#10b981;
+                                            font-size:14px;
+                                            font-weight:600;
+                                        ">
+                                            Ethical Score • ${item.ethicalScore ?? "N/A"}
+                                        </div>
+                                    </div>
+                                `).join("")}
                             </div>
-
-                        `).join("")}
-
-                    </div>
-
-                </div>
-
-                `
-                : ""
+                        </div>
+                    `
+                    : ""
             }
 
         </div>
