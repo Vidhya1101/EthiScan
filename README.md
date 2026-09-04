@@ -6,8 +6,6 @@ EthiScan is an AI-powered web application that helps users understand the ethica
 
 - **Live Application:** https://vidhya1101.github.io/EthiScan/
 - **GitHub Repository:** https://github.com/Vidhya1101/EthiScan
-- **Backend API:** https://ethiscan-dz9i.onrender.com
-
 > The frontend is hosted on GitHub Pages and the backend is deployed on Render. MongoDB Atlas is used for database storage.
 
 ---
@@ -109,7 +107,6 @@ EthiScan is deployed using a separate frontend and backend architecture:
 |---|---|---|
 | Frontend | GitHub Pages | https://vidhya1101.github.io/EthiScan/ |
 | Source Code | GitHub | https://github.com/Vidhya1101/EthiScan |
-| Backend API | Render | https://ethiscan-dz9i.onrender.com |
 | Database | MongoDB Atlas | Cloud database |
 
 The GitHub Pages frontend sends API requests to the Render backend. The backend communicates with MongoDB Atlas, Serper, and OpenRouter to process brand searches and store authenticated users' search history.
