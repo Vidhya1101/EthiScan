@@ -203,6 +203,36 @@ app.get(
         }
     }
 );
+app.delete(
+    "/api/history",
+    parseAuthToken,
+    async (req, res) => {
+        try {
+            if (!req.user) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Authentication required."
+                });
+            }
+            const userId = req.user.id || req.user._id;
+            const result = await SearchHistory.deleteMany({
+                userId: userId
+            });
+            res.json({
+                success: true,
+                message: "Search history cleared successfully.",
+                deletedCount: result.deletedCount
+            });
+        } catch (error) {
+            console.log("CLEAR HISTORY ERROR:", error);
+
+            res.status(500).json({
+                success: false,
+                message: "Failed to clear search history."
+            });
+        }
+    }
+);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
