@@ -8,14 +8,30 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function getGuestHistory() { try { return JSON.parse(sessionStorage.getItem("ethiscan_guest_history") || "[]"); } catch { return []; } }
-
+function getCurrentUserKey() {
+    try {
+        const user = JSON.parse(localStorage.getItem("ethiscan_user") || "null");
+        return user?.email ? `ethiscan_history_${user.email.trim().toLowerCase()}` : null;
+    } catch { return null; }
+}
+function getAccountHistory() {
+    const key = getCurrentUserKey();
+    if (!key) return [];
+    try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; }
+}
+function saveAccountHistory(brand) {
+    const key = getCurrentUserKey();
+    if (!key) return;
+    const history = getAccountHistory();
+    history.unshift({ _id: `local-${Date.now()}`, query: brand.brandName || "Unknown", status: Number(brand.ethicalScore) >= 70 ? "ETHICAL" : Number(brand.ethicalScore) >= 40 ? "WARNING" : "UNETHICAL", createdAt: new Date().toISOString(), result: brand, thumbnail: createGuestThumbnail(brand), localOnly: true });
+    localStorage.setItem(key, JSON.stringify(history.slice(0, 50)));
+}
 function createGuestThumbnail(brand) {
     const score = Math.max(0, Math.min(100, Number(brand.ethicalScore) || 0));
     const accent = score >= 70 ? "#10b981" : score >= 40 ? "#f59e0b" : "#ef4444";
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="420" height="220"><rect width="420" height="220" rx="18" fill="#0f1117"/><text x="24" y="38" fill="#7c8597" font-family="Arial" font-size="11">ETHISCAN • RESULT PREVIEW</text><text x="24" y="78" fill="white" font-family="Arial" font-size="25" font-weight="700">${brand.brandName || "Brand"}</text><text x="24" y="108" fill="#9ca3af" font-family="Arial" font-size="13">${brand.industry || "Ethical analysis"}</text><circle cx="345" cy="105" r="55" fill="#11151f" stroke="${accent}" stroke-width="6"/><text x="345" y="117" text-anchor="middle" fill="${accent}" font-family="Arial" font-size="34" font-weight="700">${score}</text></svg>`;
     return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
-
 function saveGuestHistory(brand) {
     const history = getGuestHistory();
     history.unshift({ _id: `guest-${Date.now()}`, query: brand.brandName || "Unknown", status: Number(brand.ethicalScore) >= 70 ? "ETHICAL" : Number(brand.ethicalScore) >= 40 ? "WARNING" : "UNETHICAL", createdAt: new Date().toISOString(), result: brand, thumbnail: createGuestThumbnail(brand) });
@@ -36,7 +52,8 @@ function initializeScannerEvents() {
             const response = await fetch(`https://ethiscan-1.onrender.com/api/brands/${encodeURIComponent(val)}`, { headers: { Authorization: token ? `Bearer ${token}` : "" } });
             const data = await response.json();
             if (!response.ok || !data.success) { if (resPlaceholder) resPlaceholder.innerHTML = `<div style="background:#111827;border:1px solid #ef4444;padding:24px;border-radius:16px;margin-top:24px;color:white;"><h3 style="color:#ef4444;">Analysis Failed</h3><p style="color:#9ca3af;">${data.message || "Unable to analyze this brand right now."}</p></div>`; return; }
-            if (!token) saveGuestHistory(data.brand);
+            if (token) saveAccountHistory(data.brand);
+            else saveGuestHistory(data.brand);
             renderResultCard(data.brand);
         } catch (error) { console.error("Analysis error:", error); if (resPlaceholder) resPlaceholder.innerHTML = `<div class="result-card-container animate-fade-in" style="background:#11131c;border:1px solid #ef4444;padding:32px;border-radius:12px;margin-top:24px;text-align:center;"><div style="font-size:18px;font-weight:600;color:#ef4444;">Server Error</div><p style="color:#9ca3af;margin-top:10px;">Unable to connect to the EthiScan server.</p></div>`; }
     }
