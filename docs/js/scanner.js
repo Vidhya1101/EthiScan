@@ -1,4 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // Guest history is temporary: a browser refresh removes it.
+    const navigation = performance.getEntriesByType("navigation")[0];
+    if (navigation && navigation.type === "reload") {
+        sessionStorage.removeItem("ethiscan_guest_history");
+    }
+
     const searchPlaceholder = document.getElementById("search-placeholder");
     if (!searchPlaceholder) return;
     const BASE_PATH = window.location.hostname === "localhost" ? "" : "/EthiScan";
