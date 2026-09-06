@@ -1,4 +1,4 @@
-const API_BASE = window.location.hostname === "localhost" ? "http://localhost:5000" : "https://ethiscan-dz9i.onrender.com";
+const API_BASE = window.location.hostname === "localhost" ? "http://localhost:5000" : "https://ethiscan-1.onrender.com";
 
 function getGuestHistory() { try { return JSON.parse(sessionStorage.getItem("ethiscan_guest_history") || "[]"); } catch { return []; } }
 function escapeHtml(value) { const div = document.createElement("div"); div.textContent = value ?? ""; return div.innerHTML; }
