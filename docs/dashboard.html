@@ -9,122 +9,36 @@
     <link rel="stylesheet" href="css/animations.css">
 </head>
 <body>
-
-    <div id="header-placeholder"></div>
-
-    <main style="max-width:1200px;margin:0 auto;padding:2rem 1rem;" class="animate-fade-in">
-
-        <header style="margin-bottom:2.5rem;">
-            <span class="badge-label" style="letter-spacing:0.1em;">
-                REAL-TIME TELEMETRY
-            </span>
-
-            <h2 style="font-size:2.5rem;font-weight:800;margin:0.5rem 0;">
-                Aggregated <span style="color:var(--accent-blue);">Intelligence</span>
-            </h2>
-
-            <p class="dashboard-subtitle" style="color:var(--text-muted);margin:0;max-width:600px;">
-                Live aggregates from your EthiScan brand analysis history.
-            </p>
-        </header>
-
-        <div class="telemetry-grid">
-
-            <div class="metric-card">
-                <div class="metric-title">TOTAL BRANDS</div>
-                <div class="metric-value primary" id="totalBrands">0</div>
-                <div class="metric-subtitle">Analyzed</div>
+<div id="header-placeholder"></div>
+<main style="max-width:1200px;margin:0 auto;padding:2rem 1rem;" class="animate-fade-in">
+    <header style="margin-bottom:2.5rem;">
+        <span class="badge-label" style="letter-spacing:.1em;">SEARCH HISTORY</span>
+        <h2 style="font-size:2.5rem;font-weight:800;margin:.5rem 0;">Your <span style="color:var(--accent-blue);">Analysis</span></h2>
+        <p class="dashboard-subtitle" style="color:var(--text-muted);margin:0;max-width:600px;">View, revisit, or remove your previous EthiScan brand analyses.</p>
+    </header>
+    <div class="telemetry-grid">
+        <div class="metric-card"><div class="metric-title">TOTAL BRANDS</div><div class="metric-value primary" id="totalBrands">0</div><div class="metric-subtitle">Analyzed</div></div>
+        <div class="metric-card"><div class="metric-title">ETHICAL</div><div class="metric-value ethical" id="ethicalCount">0</div><div class="metric-subtitle" id="ethicalPct">0% of catalog</div></div>
+        <div class="metric-card"><div class="metric-title">WARNING</div><div class="metric-value warning" id="warningCount">0</div><div class="metric-subtitle" id="warningPct">0% of catalog</div></div>
+        <div class="metric-card"><div class="metric-title">UNETHICAL</div><div class="metric-value unethical" id="unethicalCount">0</div><div class="metric-subtitle" id="unethicalPct">0% of catalog</div></div>
+    </div>
+    <section class="dashboard-columns">
+        <div class="board-container">
+            <div class="board-header" style="display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+                <h3>Your Search History</h3>
+                <button id="clearHistoryBtn" type="button" style="background:transparent;border:1px solid #ff4d4d;color:#ff4d4d;padding:.55rem 1rem;border-radius:8px;cursor:pointer;font-weight:600;">Clear History</button>
             </div>
-
-            <div class="metric-card">
-                <div class="metric-title">ETHICAL</div>
-                <div class="metric-value ethical" id="ethicalCount">0</div>
-                <div class="metric-subtitle" id="ethicalPct">0% of catalog</div>
+            <div style="overflow-x:auto;">
+                <table class="custom-table">
+                    <thead><tr><th>Brand/Input</th><th>Timestamp</th><th>Status Result</th><th>Actions</th></tr></thead>
+                    <tbody id="searchHistoryTableBody"><tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--text-muted);">Loading history...</td></tr></tbody>
+                </table>
             </div>
-
-            <div class="metric-card">
-                <div class="metric-title">WARNING</div>
-                <div class="metric-value warning" id="warningCount">0</div>
-                <div class="metric-subtitle" id="warningPct">0% of catalog</div>
-            </div>
-
-            <div class="metric-card">
-                <div class="metric-title">UNETHICAL</div>
-                <div class="metric-value unethical" id="unethicalCount">0</div>
-                <div class="metric-subtitle" id="unethicalPct">0% of catalog</div>
-            </div>
-
         </div>
-
-        <section class="dashboard-columns">
-
-            <div class="board-container">
-
-                <div class="board-header" style="
-                    display:flex;
-                    justify-content:space-between;
-                    align-items:center;
-                    gap:1rem;
-                ">
-
-                    <h3>Your Search History</h3>
-
-                    <button
-                        id="clearHistoryBtn"
-                        type="button"
-                        style="
-                            background:transparent;
-                            border:1px solid #ff4d4d;
-                            color:#ff4d4d;
-                            padding:0.55rem 1rem;
-                            border-radius:8px;
-                            cursor:pointer;
-                            font-weight:600;
-                            transition:0.2s;
-                        "
-                    >
-                        Clear History
-                    </button>
-
-                </div>
-
-                <div style="overflow-x:auto;">
-
-                    <table class="custom-table">
-
-                        <thead>
-                            <tr>
-                                <th>Brand/Input</th>
-                                <th>Timestamp</th>
-                                <th>Status Result</th>
-                            </tr>
-                        </thead>
-
-                        <tbody id="searchHistoryTableBody">
-                            <tr>
-                                <td colspan="3" style="
-                                    text-align:center;
-                                    padding:2rem;
-                                    color:var(--text-muted);
-                                ">
-                                    Loading history...
-                                </td>
-                            </tr>
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </div>
-
-        </section>
-
-    </main>
-
-    <script src="./js/main.js"></script>
-    <script src="./js/loader.js"></script>
-    <script src="./js/dashboard.js"></script>
-
+    </section>
+</main>
+<script src="./js/main.js"></script>
+<script src="./js/loader.js"></script>
+<script src="./js/dashboard.js"></script>
 </body>
 </html>
