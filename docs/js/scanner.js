@@ -33,7 +33,7 @@ function initializeScannerEvents() {
         if (resPlaceholder) resPlaceholder.innerHTML = `<div class="result-card-container animate-fade-in" style="background:#11131c;border:1px solid #1e2230;padding:32px;border-radius:12px;margin-top:24px;text-align:center;"><div style="font-size:18px;font-weight:600;">Analyzing Brand Ethics...</div></div>`;
         try {
             const token = localStorage.getItem("ethiscan_token");
-            const response = await fetch(`https://ethiscan-dz9i.onrender.com/api/brands/${encodeURIComponent(val)}`, { headers: { Authorization: token ? `Bearer ${token}` : "" } });
+            const response = await fetch(`https://ethiscan-1.onrender.com/api/brands/${encodeURIComponent(val)}`, { headers: { Authorization: token ? `Bearer ${token}` : "" } });
             const data = await response.json();
             if (!response.ok || !data.success) { if (resPlaceholder) resPlaceholder.innerHTML = `<div style="background:#111827;border:1px solid #ef4444;padding:24px;border-radius:16px;margin-top:24px;color:white;"><h3 style="color:#ef4444;">Analysis Failed</h3><p style="color:#9ca3af;">${data.message || "Unable to analyze this brand right now."}</p></div>`; return; }
             if (!token) saveGuestHistory(data.brand);
