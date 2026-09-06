@@ -1,54 +1,29 @@
 const axios = require("axios");
 
 async function scrapeBrandData(brandName) {
-
     try {
-
-        const response =
-            await axios.post(
-
-                "https://google.serper.dev/search",
-
-                {
-                    q:
-                    `${brandName} sustainability ethics controversies`
+        const response = await axios.post(
+            "https://google.serper.dev/search",
+            { q: `${brandName} sustainability ethics controversies` },
+            {
+                headers: {
+                    "X-API-KEY": process.env.SERPER_API_KEY,
+                    "Content-Type": "application/json"
                 },
+                timeout: 15000
+            }
+        );
 
-                {
-                    headers: {
-
-                        "X-API-KEY":
-                        process.env.SERPER_API_KEY,
-
-                        "Content-Type":
-                        "application/json"
-                    }
-                }
-            );
-
-        const results =
-            response.data.organic || [];
-
+        const results = response.data.organic || [];
         let combinedText = "";
 
-        results.forEach((result) => {
-
-            combinedText +=
-                `${result.title} `;
-
-            combinedText +=
-                `${result.snippet} `;
+        results.forEach(result => {
+            combinedText += `${result.title || ""} ${result.snippet || ""} `;
         });
 
         return combinedText;
-
     } catch (error) {
-
-        console.log(
-            "SERPER ERROR:",
-            error.message
-        );
-
+        console.log("SERPER ERROR:", error.message);
         return "";
     }
 }
