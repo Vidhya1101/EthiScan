@@ -1,9 +1,52 @@
 const DASHBOARD_API_BASE = window.location.hostname === "localhost" ? "http://localhost:5000" : "https://ethiscan-1.onrender.com";
 const HISTORY_KEY = "ethiscan_search_history";
 
-function getStoredHistory() { try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); } catch { return []; } }
-function setStoredHistory(history) { localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 50))); }
+function readJsonStorage(storage, key) {
+    try {
+        return JSON.parse(storage.getItem(key) || "[]");
+    } catch {
+        return [];
+    }
+}
+
+function getStoredHistory() {
+    return readJsonStorage(localStorage, HISTORY_KEY);
+}
+
+function getLegacyAccountHistory() {
+    try {
+        const user = JSON.parse(localStorage.getItem("ethiscan_user") || "null");
+        const email = user?.email?.trim().toLowerCase();
+        if (!email) return [];
+        return readJsonStorage(localStorage, `ethiscan_history_${email}`);
+    } catch {
+        return [];
+    }
+}
+
+function getLegacyGuestHistory() {
+    return readJsonStorage(sessionStorage, "ethiscan_guest_history");
+}
+
+function mergeHistoryLists(...lists) {
+    const merged = [];
+    const seen = new Set();
+    lists.flat().forEach(item => {
+        if (!item || typeof item !== "object") return;
+        const fingerprint = item._id || `${item.query || ""}|${item.createdAt || ""}|${item.status || ""}`;
+        if (seen.has(String(fingerprint))) return;
+        seen.add(String(fingerprint));
+        merged.push(item);
+    });
+    return merged.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)).slice(0, 200);
+}
+
+function setStoredHistory(history) {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 50)));
+}
+
 function escapeHtml(value) { const div = document.createElement("div"); div.textContent = value ?? ""; return div.innerHTML; }
+
 function createClientThumbnail(result = {}) {
     const score = Math.max(0, Math.min(100, Number(result.ethicalScore) || 0));
     const accent = score >= 70 ? "#10b981" : score >= 40 ? "#f59e0b" : "#ef4444";
@@ -22,6 +65,7 @@ function ensureHistoryModal() {
     modal.querySelector(".history-modal-close").addEventListener("click", close);
     document.addEventListener("keydown", event => { if (event.key === "Escape") close(); });
 }
+
 function openHistoryPreview(item) {
     ensureHistoryModal();
     const modal = document.getElementById("historyPreviewModal");
@@ -60,24 +104,34 @@ function renderHistory(history) {
 async function loadDashboard() {
     ensureHistoryModal();
     const token = localStorage.getItem("ethiscan_token");
-    const localHistory = getStoredHistory();
-    if (!token) { renderHistory(localHistory); return; }
+    const universalHistory = getStoredHistory();
+    const legacyHistory = token ? getLegacyAccountHistory() : getLegacyGuestHistory();
+    if (!token) {
+        renderHistory(mergeHistoryLists(universalHistory, legacyHistory));
+        return;
+    }
     try {
         const response = await fetch(`${DASHBOARD_API_BASE}/api/history`, { headers: { Authorization: `Bearer ${token}` } });
         const serverHistory = response.ok ? await response.json() : [];
-        const serverIds = new Set(serverHistory.map(item => String(item._id)));
-        const merged = [...serverHistory, ...localHistory.filter(item => !serverIds.has(String(item._id)))];
-        renderHistory(merged);
+        renderHistory(mergeHistoryLists(serverHistory, universalHistory, legacyHistory));
     } catch (error) {
         console.error("Dashboard history error:", error);
-        renderHistory(localHistory);
+        renderHistory(mergeHistoryLists(universalHistory, legacyHistory));
     }
 }
 
 async function deleteHistoryItem(id) {
     if (!confirm("Do you want to delete this history item?")) return;
-    const localUpdated = getStoredHistory().filter(item => String(item._id) !== String(id));
-    setStoredHistory(localUpdated);
+    setStoredHistory(getStoredHistory().filter(item => String(item._id) !== String(id)));
+    try {
+        const user = JSON.parse(localStorage.getItem("ethiscan_user") || "null");
+        const email = user?.email?.trim().toLowerCase();
+        if (email) {
+            const key = `ethiscan_history_${email}`;
+            localStorage.setItem(key, JSON.stringify(readJsonStorage(localStorage, key).filter(item => String(item._id) !== String(id))));
+        }
+        sessionStorage.setItem("ethiscan_guest_history", JSON.stringify(readJsonStorage(sessionStorage, "ethiscan_guest_history").filter(item => String(item._id) !== String(id))));
+    } catch {}
     if (!String(id).startsWith("local-")) {
         try {
             const token = localStorage.getItem("ethiscan_token");
@@ -90,6 +144,12 @@ async function deleteHistoryItem(id) {
 async function clearHistory() {
     if (!confirm("Do you want to delete your entire search history? This cannot be undone.")) return;
     setStoredHistory([]);
+    try {
+        const user = JSON.parse(localStorage.getItem("ethiscan_user") || "null");
+        const email = user?.email?.trim().toLowerCase();
+        if (email) localStorage.removeItem(`ethiscan_history_${email}`);
+        sessionStorage.removeItem("ethiscan_guest_history");
+    } catch {}
     const token = localStorage.getItem("ethiscan_token");
     if (token) {
         try { await fetch(`${DASHBOARD_API_BASE}/api/history`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }); } catch (error) { console.error("Clear history error:", error); }
