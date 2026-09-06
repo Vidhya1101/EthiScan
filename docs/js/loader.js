@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initializePasswordRecovery();
 });
 
-const API_BASE = "https://ethiscan-dz9i.onrender.com";
+const API_BASE = "https://ethiscan-1.onrender.com";
 
 function showInlineMessage(id, message, type = "success") {
     const box = document.getElementById(id);
