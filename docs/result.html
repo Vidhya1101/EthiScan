@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EthiScan - Previous Result</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+<div id="header-placeholder"></div>
+<main style="max-width:1000px;margin:0 auto;padding:2rem 1rem;">
+    <a href="dashboard.html" style="text-decoration:none;">← Back to History</a>
+    <div id="savedResult" style="margin-top:20px;">Loading result...</div>
+</main>
+<script src="./js/main.js"></script>
+<script>
+const API_BASE = window.location.hostname === "localhost" ? "http://localhost:5000" : "https://ethiscan-dz9i.onrender.com";
+function escapeHtml(value) { const div = document.createElement("div"); div.textContent = value ?? ""; return div.innerHTML; }
+function renderSavedResult(result) {
+    const score = Number(result.ethicalScore) || 0;
+    const accent = score >= 70 ? "#10b981" : score >= 40 ? "#f59e0b" : "#ef4444";
+    document.getElementById("savedResult").innerHTML = `
+        <div style="background:#0f1117;border:1px solid #1f2430;padding:32px;border-radius:20px;color:white;">
+            <div style="display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap;">
+                <div><div style="font-size:11px;color:#7c8597;letter-spacing:1px;text-transform:uppercase;">Saved Ethical Analysis</div><h1 style="font-size:40px;margin:10px 0;">${escapeHtml(result.brandName || "Unknown")}</h1><div style="color:#7c8597;">Industry • ${escapeHtml(result.industry || "General")}</div></div>
+                <div style="width:100px;height:100px;border-radius:50%;border:5px solid ${accent};display:flex;align-items:center;justify-content:center;font-size:34px;color:${accent};font-weight:700;">${score}</div>
+            </div>
+            <div style="margin-top:24px;padding:18px;background:#151926;border-radius:14px;line-height:1.8;color:#cbd5e1;">${escapeHtml(result.description || "No description available.")}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px;">
+                <div style="padding:20px;background:#151926;border-radius:14px;"><h3>Positive Indicators</h3><p style="color:#9ca3af;line-height:1.8;">${escapeHtml(result.pros || "No positive indicators found.")}</p></div>
+                <div style="padding:20px;background:#151926;border-radius:14px;"><h3>Ethical Concerns</h3><p style="color:#9ca3af;line-height:1.8;">${escapeHtml(result.cons || "No ethical concerns found.")}</p></div>
+            </div>
+            ${Array.isArray(result.smartAlternatives) && result.smartAlternatives.length ? `<div style="margin-top:20px;"><h3>Better Ethical Alternatives</h3>${result.smartAlternatives.map(item => `<div style="padding:14px;background:#151926;border-radius:12px;margin-top:10px;"><strong>${escapeHtml(item.brandName)}</strong> — Ethical Score: ${escapeHtml(item.ethicalScore ?? "N/A")}</div>`).join("")}</div>` : ""}
+        </div>`;
+}
+async function loadResult() {
+    const id = new URLSearchParams(location.search).get("id");
+    const token = localStorage.getItem("ethiscan_token");
+    if (!id || !token) { document.getElementById("savedResult").textContent = "This saved result is available only to the signed-in account that owns it."; return; }
+    try {
+        const response = await fetch(`${API_BASE}/api/history`, { headers: { Authorization: `Bearer ${token}` } });
+        const history = await response.json();
+        const item = history.find(entry => entry._id === id);
+        if (!item || !item.result) throw new Error("Result not found");
+        renderSavedResult(item.result);
+    } catch (error) {
+        document.getElementById("savedResult").textContent = "Unable to load this saved result.";
+    }
+}
+loadResult();
+</script>
+</body>
+</html>
