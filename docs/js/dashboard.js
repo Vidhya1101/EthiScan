@@ -1,4 +1,4 @@
-const API_BASE = window.location.hostname === "localhost" ? "http://localhost:5000" : "https://ethiscan-1.onrender.com";
+const DASHBOARD_API_BASE = window.location.hostname === "localhost" ? "http://localhost:5000" : "https://ethiscan-1.onrender.com";
 const HISTORY_KEY = "ethiscan_search_history";
 
 function getStoredHistory() { try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); } catch { return []; } }
@@ -63,9 +63,8 @@ async function loadDashboard() {
     const localHistory = getStoredHistory();
     if (!token) { renderHistory(localHistory); return; }
     try {
-        const response = await fetch(`${API_BASE}/api/history`, { headers: { Authorization: `Bearer ${token}` } });
+        const response = await fetch(`${DASHBOARD_API_BASE}/api/history`, { headers: { Authorization: `Bearer ${token}` } });
         const serverHistory = response.ok ? await response.json() : [];
-        // Prefer MongoDB records, but never hide locally saved records if the server is empty/unavailable.
         const serverIds = new Set(serverHistory.map(item => String(item._id)));
         const merged = [...serverHistory, ...localHistory.filter(item => !serverIds.has(String(item._id)))];
         renderHistory(merged);
@@ -82,7 +81,7 @@ async function deleteHistoryItem(id) {
     if (!String(id).startsWith("local-")) {
         try {
             const token = localStorage.getItem("ethiscan_token");
-            if (token) await fetch(`${API_BASE}/api/history/${encodeURIComponent(id)}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+            if (token) await fetch(`${DASHBOARD_API_BASE}/api/history/${encodeURIComponent(id)}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
         } catch (error) { console.error("Delete history error:", error); }
     }
     loadDashboard();
@@ -93,7 +92,7 @@ async function clearHistory() {
     setStoredHistory([]);
     const token = localStorage.getItem("ethiscan_token");
     if (token) {
-        try { await fetch(`${API_BASE}/api/history`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }); } catch (error) { console.error("Clear history error:", error); }
+        try { await fetch(`${DASHBOARD_API_BASE}/api/history`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }); } catch (error) { console.error("Clear history error:", error); }
     }
     renderHistory([]);
 }
