@@ -1,20 +1,7 @@
 const API_BASE = window.location.hostname === "localhost" ? "http://localhost:5000" : "https://ethiscan-dz9i.onrender.com";
 
-function getGuestHistory() {
-    try { return JSON.parse(sessionStorage.getItem("ethiscan_guest_history") || "[]"); } catch { return []; }
-}
-
-function clearGuestHistory() {
-    sessionStorage.removeItem("ethiscan_guest_history");
-    renderHistory([], false);
-}
-
-function escapeHtml(value) {
-    const div = document.createElement("div");
-    div.textContent = value ?? "";
-    return div.innerHTML;
-}
-
+function getGuestHistory() { try { return JSON.parse(sessionStorage.getItem("ethiscan_guest_history") || "[]"); } catch { return []; } }
+function escapeHtml(value) { const div = document.createElement("div"); div.textContent = value ?? ""; return div.innerHTML; }
 function createClientThumbnail(result = {}) {
     const score = Math.max(0, Math.min(100, Number(result.ethicalScore) || 0));
     const accent = score >= 70 ? "#10b981" : score >= 40 ? "#f59e0b" : "#ef4444";
@@ -27,26 +14,15 @@ function renderHistory(history, isLoggedIn) {
     if (!tableBody) return;
     tableBody.innerHTML = "";
     let ethical = 0, warning = 0, unethical = 0;
-
     history.forEach(item => {
-        if (item.status === "ETHICAL") ethical++;
-        else if (item.status === "WARNING") warning++;
-        else unethical++;
+        if (item.status === "ETHICAL") ethical++; else if (item.status === "WARNING") warning++; else unethical++;
         const id = item._id;
         const thumbnail = item.thumbnail || createClientThumbnail(item.result);
-        tableBody.innerHTML += `
-            <tr>
-                <td><strong>${escapeHtml(item.query)}</strong></td>
-                <td style="color:var(--text-muted);font-size:.9rem;">${new Date(item.createdAt).toLocaleString()}</td>
-                <td><span class="status-badge ${(item.status || "WARNING").toLowerCase()}">${escapeHtml(item.status || "WARNING")}</span></td>
-                <td><a class="view-result-btn" href="${isLoggedIn ? `result.html?id=${encodeURIComponent(id)}` : "#"}"><img src="${thumbnail}" alt="${escapeHtml(item.query)} result" class="history-thumb"></a></td>
-                <td><button class="delete-history-btn" data-id="${escapeHtml(id)}" type="button" title="Delete history">🗑</button></td>
-            </tr>`;
+        const viewUrl = `result.html?id=${encodeURIComponent(id)}`;
+        tableBody.innerHTML += `<tr><td><strong>${escapeHtml(item.query)}</strong></td><td style="color:var(--text-muted);font-size:.9rem;">${new Date(item.createdAt).toLocaleString()}</td><td><span class="status-badge ${(item.status || "WARNING").toLowerCase()}">${escapeHtml(item.status || "WARNING")}</span></td><td><a class="view-result-btn" href="${viewUrl}"><img src="${thumbnail}" alt="${escapeHtml(item.query)} result" class="history-thumb"></a></td><td><button class="delete-history-btn" data-id="${escapeHtml(id)}" type="button" title="Delete history">🗑</button></td></tr>`;
     });
-
     if (!history.length) tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted);">No search history yet.</td></tr>`;
     tableBody.querySelectorAll(".delete-history-btn").forEach(button => button.addEventListener("click", () => deleteHistoryItem(button.dataset.id, isLoggedIn)));
-
     const total = history.length;
     document.getElementById("totalBrands").textContent = total;
     document.getElementById("ethicalCount").textContent = ethical;
@@ -69,10 +45,7 @@ async function loadDashboard() {
             if (!response.ok) throw new Error("Failed to load history");
             renderHistory(await response.json(), true);
         } else renderHistory(getGuestHistory(), false);
-    } catch (error) {
-        console.error("Dashboard error:", error);
-        renderHistory([], !!token);
-    }
+    } catch (error) { console.error("Dashboard error:", error); renderHistory([], !!token); }
 }
 
 async function deleteHistoryItem(id, isLoggedIn) {
@@ -96,7 +69,8 @@ async function clearHistory() {
     if (!token) {
         if (!getGuestHistory().length) return;
         if (!confirm("Do you want to delete the entire guest history?")) return;
-        clearGuestHistory();
+        sessionStorage.removeItem("ethiscan_guest_history");
+        renderHistory([], false);
         return;
     }
     if (!confirm("Do you want to delete your entire search history? This cannot be undone.")) return;
